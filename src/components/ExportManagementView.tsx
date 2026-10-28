@@ -60,7 +60,7 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
 
         <div className="flex flex-wrap items-center gap-2">
           <a
-            href="/1028-source.tar.gz"
+            href={`${import.meta.env.BASE_URL}1028-source.tar.gz`}
             download="1028-source.tar.gz"
             className="px-3.5 py-2 text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 hover:border-zinc-600 rounded-lg flex items-center gap-1.5 transition-colors"
             title="下載本專案完整原始碼封存檔"

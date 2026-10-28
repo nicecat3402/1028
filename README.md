@@ -7,6 +7,9 @@
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8?logo=tailwindcss)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite)
+[![Deploy GitHub Pages](https://github.com/nicecat3402/1028/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/nicecat3402/1028/actions/workflows/deploy-pages.yml)
+
+> 🌐 **線上體驗**: <https://nicecat3402.github.io/1028/>
 
 ---
 
@@ -49,7 +52,7 @@
 ### 1. 取得專案原始碼
 
 ```bash
-git clone https://github.com/<您的GitHub帳號>/1028.git
+git clone https://github.com/nicecat3402/1028.git
 cd 1028
 ```
 
@@ -74,6 +77,18 @@ npm run build
 ```
 
 建置完成之靜態檔案將輸出至 `dist/` 資料夾，可直接佈署於任何 Web 伺服器 (Nginx, Caddy, Vercel, GitHub Pages 等)。
+
+> ⚠️ 佈署到 GitHub Pages 專案網站 (子路徑 `/1028/`) 時需帶上 base 路徑，建置前請設定環境變數：
+> `BASE_PATH=/1028/ npm run build`
+
+### 5. GitHub Pages 自動佈署
+
+推送至 `main` 分支後，GitHub Actions 會自動執行 `.github/workflows/deploy-pages.yml`：
+型別檢查 → `npm ci` → `vite build` (base=`/1028/`) → 上傳 `dist/` → 發佈至 GitHub Pages。
+
+亦可於 Actions 頁面選擇 **Deploy GitHub Pages** → **Run workflow** 手動觸發。
+
+網站網址：<https://nicecat3402.github.io/1028/>
 
 ---
 

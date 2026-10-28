@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // GitHub Pages 專案網站是佈署在 /<repo>/ 子路徑下，建置時需帶上該 base 路徑。
+    // deploy workflow 會設定 BASE_PATH=/1028/；本機 dev/preview 維持 '/'。
+    base: process.env.BASE_PATH || '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
