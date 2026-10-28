@@ -1,0 +1,6 @@
+{
+  "name": "名片辨識與人脈整理系統",
+  "description": "完全地端名片辨識、階層人脈管理與三路混合檢索系統，支援公司自動歸併、部門職級樹與階段2前置驗證試驗場",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
