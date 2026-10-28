@@ -110,7 +110,8 @@ export function normalizeCompanyName(name: string): string {
 /**
  * 台灣統一編號 8 碼演算法驗證
  * 乘數：[1, 2, 1, 2, 1, 2, 4, 1]
- * 特別規則：若第 7 位為 7，乘積 28 之和為 2+8=10，取 0 或取 1 計算兩次，任一能被 10 整除即合法
+ * 2023 年起採 mod 5；第 7 位為 7 時，數位和 10 可視為 0 或 1（sum 與 sum+1 模 5）。
+ * 僅檢查格式／檢查碼，不代表該號碼已登記。
  */
 export function validateTaiwanTaxId(taxId: string): { isValid: boolean; reason: string } {
   if (!taxId) return { isValid: false, reason: '統編為空' };
@@ -129,16 +130,17 @@ export function validateTaiwanTaxId(taxId: string): { isValid: boolean; reason: 
     sum += Math.floor(product / 10) + (product % 10);
   }
 
-  if (sum % 10 === 0) {
+  if (clean === '00000000') return { isValid: false, reason: '全零為示意佔位值，不可作為統編' };
+  if (sum % 5 === 0) {
     return { isValid: true, reason: '合法統一編號（標準檢核碼通過）' };
   }
 
   // 例外規則：第 7 碼 (index 6) 為 7
   if (digits[6] === 7) {
     // 當第 7 碼是 7，乘數 4 產生 28，十位數加個位數為 10
-    // 特殊規則允許其乘積和計為 1
-    const altSum = sum - 1;
-    if (altSum % 10 === 0) {
+    // 10 -> 1 相差 -9，mod 5 下等價於 sum+1。
+    const altSum = sum + 1;
+    if (altSum % 5 === 0) {
       return { isValid: true, reason: '合法統一編號（第 7 位為 7 之特殊規則通過）' };
     }
   }
@@ -378,8 +380,8 @@ export function inferTitleRank(titleRaw: string): TitleRankNumber {
   const t = titleRaw.toLowerCase();
 
   if (/董事長|創辦人|負責人|chairman|founder/i.test(t)) return 95;
-  if (/總經理|執行長|總監|ceo|president|managing director/i.test(t)) return 90;
-  if (/副總|協理|vp|vice president/i.test(t)) return 80;
+  if (/副總|協理|\bvp\b|vice president/i.test(t)) return 80;
+  if (/總經理|執行長|總監|財務長|技術長|營運長|首席.*官|\b(ceo|cto|cfo|coo|president)\b|managing director/i.test(t)) return 90;
   if (/廠長|處長|資深經理|director/i.test(t)) return 70;
   if (/經理|理級|manager/i.test(t)) return 60;
   if (/副理|課長|section chief/i.test(t)) return 50;

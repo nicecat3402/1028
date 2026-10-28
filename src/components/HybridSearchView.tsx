@@ -174,7 +174,7 @@ export const HybridSearchView: React.FC<HybridSearchViewProps> = ({
             type="text"
             value={filter.keyword}
             onChange={(e) => setFilter({ ...filter, keyword: e.target.value })}
-            placeholder="輸入自然語言問題或關鍵字，例如：「做沖壓的模具廠」、「林志豪」、「統編 24519803」..."
+            placeholder="輸入關鍵字，例如：「模具」、「林志豪」或名片上的統編數字..."
             className="w-full bg-zinc-950 border border-zinc-800 text-[#f4f4f5] text-sm rounded-lg pl-11 pr-24 py-3 focus:outline-none focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/40 placeholder:text-zinc-500"
           />
           {filter.keyword && (

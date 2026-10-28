@@ -1,5 +1,22 @@
 import { Contact, Company, Department } from '../types';
 
+export function escapeVCardText(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
+}
+
+// Fold by UTF-8 octets, without splitting a Unicode code point.
+export function foldVCardLine(line: string): string {
+  const encoder = new TextEncoder();
+  let result = '', bytes = 0;
+  for (const char of line) {
+    const size = encoder.encode(char).length;
+    if (bytes + size > 75) { result += '\r\n '; bytes = 1; }
+    result += char;
+    bytes += size;
+  }
+  return result;
+}
+
 /**
  * Generate vCard 3.0 standard text string
  */
@@ -7,47 +24,48 @@ export function generateVCard3(contact: Contact, company?: Company, department?:
   const lines: string[] = [
     'BEGIN:VCARD',
     'VERSION:3.0',
-    `N;CHARSET=UTF-8:${contact.name};;;;`,
-    `FN;CHARSET=UTF-8:${contact.name}`,
+    `N;CHARSET=UTF-8:${escapeVCardText(contact.name)};;;;`,
+    `FN;CHARSET=UTF-8:${escapeVCardText(contact.name)}`,
   ];
 
   if (company) {
-    const orgStr = department ? `${company.canonical_name};${department.name}` : company.canonical_name;
+    const orgStr = department ? `${escapeVCardText(company.canonical_name)};${escapeVCardText(department.name)}` : escapeVCardText(company.canonical_name);
     lines.push(`ORG;CHARSET=UTF-8:${orgStr}`);
   }
 
   if (contact.title_raw) {
-    lines.push(`TITLE;CHARSET=UTF-8:${contact.title_raw}`);
+    lines.push(`TITLE;CHARSET=UTF-8:${escapeVCardText(contact.title_raw)}`);
   }
 
   if (contact.mobile) {
-    lines.push(`TEL;TYPE=CELL,VOICE:${contact.mobile}`);
+    lines.push(`TEL;TYPE=CELL,VOICE:${contact.mobile.replace(/[^+\d() .-]/g, '')}`);
   }
 
   if (contact.direct_phone) {
-    const phoneWithExt = contact.extension ? `${contact.direct_phone};${contact.extension}` : contact.direct_phone;
+    const phoneWithExt = contact.direct_phone.replace(/[^+\d() .-]/g, '');
     lines.push(`TEL;TYPE=WORK,VOICE:${phoneWithExt}`);
   }
 
   if (contact.email) {
-    lines.push(`EMAIL;TYPE=INTERNET,WORK:${contact.email}`);
+    lines.push(`EMAIL;TYPE=INTERNET,WORK:${escapeVCardText(contact.email)}`);
   }
 
   if (company?.address) {
-    lines.push(`ADR;TYPE=WORK;CHARSET=UTF-8:;;${company.address};;;;`);
+    lines.push(`ADR;TYPE=WORK;CHARSET=UTF-8:;;${escapeVCardText(company.address)};;;;`);
   }
 
   // Custom X- fields
   lines.push(`X-TITLE-RANK:${contact.title_rank}`);
   if (company?.tax_id) {
-    lines.push(`X-TAX-ID:${company.tax_id}`);
+    lines.push(`X-TAX-ID:${escapeVCardText(company.tax_id)}`);
   }
-  if (contact.notes) {
-    lines.push(`NOTE;CHARSET=UTF-8:${contact.notes}`);
+  const notes = [contact.notes, contact.extension ? `分機: ${contact.extension}` : ''].filter(Boolean).join('\n');
+  if (notes) {
+    lines.push(`NOTE;CHARSET=UTF-8:${escapeVCardText(notes)}`);
   }
 
   lines.push('END:VCARD');
-  return lines.join('\r\n');
+  return lines.map(foldVCardLine).join('\r\n') + '\r\n';
 }
 
 /**

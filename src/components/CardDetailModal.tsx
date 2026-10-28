@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, Contact, Company } from '../types';
 import {
   X,
@@ -38,6 +38,33 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    dialog?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); closeRef.current(); }
+      if (event.key !== 'Tab' || !dialog) return;
+      const elements = [...dialog.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex="0"]')].filter(el => el.getClientRects().length > 0);
+      const first = elements[0], last = elements.at(-1);
+      if (!first) { event.preventDefault(); return; }
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      timers.current.forEach(clearTimeout);
+      previous?.focus();
+    };
+  }, []);
 
   // Validation states
   const taxIdVal = validateTaiwanTaxId(company.tax_id);
@@ -58,22 +85,24 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
     };
     onSave(formData, updatedCard);
     setSaveSuccess(true);
-    setTimeout(() => {
+    timers.current.push(setTimeout(() => {
       setSaveSuccess(false);
       onClose();
-    }, 800);
+    }, 800));
   };
 
-  const handleCopyAll = () => {
+  const handleCopyAll = async () => {
     const text = `姓名: ${formData.name}\n公司: ${company.canonical_name}\n職稱: ${formData.title_raw} (權重: ${formData.title_rank})\n手機: ${formData.mobile}\n市話: ${formData.direct_phone} 分機 ${formData.extension}\nEmail: ${formData.email}\n地址: ${company.address}\n統編: ${company.tax_id}`;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      timers.current.push(setTimeout(() => setCopied(false), 2000));
+    } catch { setCopied(false); }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-[#09090b] border border-zinc-800 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-[#f4f4f5]">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="名片辨識核對與欄位編輯" tabIndex={-1} className="bg-[#09090b] border border-zinc-800 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-[#f4f4f5]">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/80">
           <div className="flex items-center gap-3">
@@ -96,7 +125,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
                 )}
               </h2>
               <p className="text-xs text-zinc-400">
-                SHA-256: <span className="font-mono text-zinc-400">{card.image_sha256.substring(0, 16)}...</span>
+                模擬指紋（非影像雜湊）: <span className="font-mono text-zinc-400">{card.image_sha256.substring(0, 16)}...</span>
               </p>
             </div>
           </div>
@@ -119,7 +148,8 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
             </button>
 
             <button
-              onClick={onClose}
+            aria-label="關閉名片詳情"
+            onClick={onClose}
               className="p-1.5 text-zinc-400 hover:text-zinc-100 rounded-lg hover:bg-zinc-800"
             >
               <X className="w-5 h-5" />

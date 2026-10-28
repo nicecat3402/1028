@@ -60,7 +60,7 @@ export const MergeQueueView: React.FC<MergeQueueViewProps> = ({
             <span>公司自動歸併待審查佇列 (Entity Resolution)</span>
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
-            避免多張名片分歧建立 • 門檻 ≥0.85 自動歸併、0.50~0.85 待人工確認、&lt;0.50 獨立新公司
+            合成候選展示：分數由規則計算。≥0.85 建議歸併、0.50~0.85 建議審查、&lt;0.50 建議獨立；DEMO 一律由使用者確認。
           </p>
         </div>
 
@@ -88,13 +88,13 @@ export const MergeQueueView: React.FC<MergeQueueViewProps> = ({
               </h3>
             </div>
             <span className="text-xs font-mono font-bold bg-rose-900/80 text-rose-200 px-2.5 py-1 rounded border border-rose-700">
-              判定結果：綜合評分 {(trapEvaluation.totalScore * 100).toFixed(0)}% (&lt; 50%) • 成功阻斷誤併！
+              判定結果：綜合評分 {(trapEvaluation.totalScore * 100).toFixed(0)}% • {trapEvaluation.decision === 'new_company' ? '建議獨立公司' : '請檢視比對依據'}
             </span>
           </div>
 
           <p className="text-xs text-zinc-300 leading-relaxed">
             兩者字面開頭皆為「達鈺」，且皆具備台灣常態公司組織名稱。若單純使用字面匹配極易產生假陽性；
-            然而透過本系統之正規化 (達鈺精密 vs 達鈺國際) + 統編 (53128409 vs 28941725) + 網域 (@dayu-precision vs @dayu-trading) 多重維度比對，綜合分數為 0 分，確保絕對不誤併！
+            下方以目前合成資料即時計算名稱、統編、網域及電話等規則分數；此分數是展示用規則結果，不是正確率或歸併保證。
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
@@ -192,7 +192,7 @@ export const MergeQueueView: React.FC<MergeQueueViewProps> = ({
                     <span className="font-mono text-blue-400 font-bold">
                       {(currentItem.calculated_score * 100).toFixed(0)}%
                     </span>
-                    ，介於 50% ~ 85% 決策邊界，請人工核對。
+                    ，{currentItem.calculated_score >= 0.85 ? '規則建議歸併' : currentItem.calculated_score >= 0.5 ? '規則建議人工審查' : '規則建議獨立公司'}。示範流程仍請人工確認。
                   </p>
                 </div>
 

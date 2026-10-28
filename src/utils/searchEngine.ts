@@ -85,10 +85,12 @@ export function execute3WaySearch(
     }
 
     // Filter by Time Range
-    if (filter.time_range && filter.time_range !== 'all' && card) {
+    if (filter.time_range && filter.time_range !== 'all') {
+      if (!card) return false;
       const cardDate = new Date(card.acquired_at).getTime();
-      const now = new Date('2026-09-07').getTime();
+      const now = Date.now();
       const days = (now - cardDate) / (1000 * 3600 * 24);
+      if (!Number.isFinite(days) || days < 0) return false;
       if (filter.time_range === '30d' && days > 30) return false;
       if (filter.time_range === '90d' && days > 90) return false;
       if (filter.time_range === '180d' && days > 180) return false;
@@ -146,7 +148,8 @@ export function execute3WaySearch(
       score += 0.9;
       hits.push({ type: 'structured', field: 'Email', score: 0.9, reason: `電子郵件匹配「${query}」` });
     }
-    if (ct.mobile.replace(/\D/g, '').includes(query.replace(/\D/g, '')) && query.length >= 4) {
+    const phoneQuery = query.replace(/\D/g, '');
+    if (phoneQuery.length >= 4 && ct.mobile.replace(/\D/g, '').includes(phoneQuery)) {
       score += 0.9;
       hits.push({ type: 'structured', field: '手機', score: 0.9, reason: `手機號碼匹配` });
     }

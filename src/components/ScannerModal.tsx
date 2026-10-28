@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Camera,
   Upload,
@@ -10,6 +10,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { OfflineQueueItem, Company } from '../types';
+import { demoText } from '../data/demoData';
 
 interface ScannerModalProps {
   offlineQueue: OfflineQueueItem[];
@@ -36,6 +37,14 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
   const [isBurstMode, setIsBurstMode] = useState<boolean>(false);
   const [capturedCount, setCapturedCount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const processing = useRef(false);
+  useEffect(() => () => {
+    timers.current.forEach(clearTimeout);
+    setOfflineQueue(prev => prev.map(item =>
+      item.status === 'processing_ocr' || item.status === 'resolving_entity'
+        ? { ...item, status: 'queued', progress: 0 } : item));
+  }, [setOfflineQueue]);
   const [activeTab, setActiveTab] = useState<'camera' | 'batch_upload' | 'queue'>('camera');
 
   // Simulated card presets for testing rapid scanner
@@ -79,7 +88,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
 
     const newItem: OfflineQueueItem = {
       id: newId,
-      blob_url: preset.imageUrl,
+      blob_url: demoText(preset.imageUrl),
       filename: `card_capture_${capturedCount + 1}.jpg`,
       sha256: mockSha,
       status: 'queued',
@@ -99,6 +108,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
   };
 
   const triggerQueueProcessing = async () => {
+    if (processing.current) return;
+    processing.current = true;
     setIsProcessing(true);
 
     // Simulate task queue execution: OCR (RapidOCR) -> Entity Resolution -> Complete
@@ -106,7 +117,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
       prev.map((item) => (item.status === 'queued' ? { ...item, status: 'processing_ocr', progress: 40 } : item))
     );
 
-    setTimeout(() => {
+    timers.current.push(setTimeout(() => {
       setOfflineQueue((prev) =>
         prev.map((item) =>
           item.status === 'processing_ocr'
@@ -115,22 +126,25 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
         )
       );
 
-      setTimeout(() => {
+      timers.current.push(setTimeout(() => {
         setOfflineQueue((prev) => {
-          const completed = prev.map((item) => ({
+          const completed = prev.map((item) => item.status === 'resolving_entity' ? ({
             ...item,
             status: 'ready_for_review' as const,
             progress: 100,
-          }));
+          }) : item);
           return completed;
         });
         setIsProcessing(false);
-      }, 700);
-    }, 800);
+        processing.current = false;
+        timers.current = [];
+      }, 700));
+    }, 800));
   };
 
   const handleApplyToSystem = (item: OfflineQueueItem) => {
-    const preset = MOCK_CARD_PRESETS.find((p) => p.contactName === item.detected_name) || MOCK_CARD_PRESETS[0];
+    const preset = MOCK_CARD_PRESETS.find((p) => p.contactName === item.detected_name);
+    if (!preset) return;
     onAddNewScannedCard(preset);
     setOfflineQueue((prev) => prev.filter((q) => q.id !== item.id));
   };
@@ -296,7 +310,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
                 點擊此處或拖曳多張名片圖檔至此
               </h3>
               <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-                支援 JPG, PNG, HEIC，一次最多 50 張。自動計算 SHA-256 去重並排入背景 OCR。
+                此區為操作示意，點擊會新增一張合成名片；尚未提供檔案上傳、去重或 OCR。
               </p>
             </div>
             <span className="inline-block text-xs text-blue-400/90 font-mono bg-zinc-950 px-3 py-1 rounded-full border border-zinc-800">
@@ -373,7 +387,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
                       {item.detected_company || '等待 OCR 抽取公司名...'}
                     </p>
                     <p className="text-[10px] font-mono text-zinc-500">
-                      SHA: {item.sha256.substring(0, 12)}... • 拍攝時間: {item.timestamp}
+                      模擬指紋: {item.sha256.substring(0, 12)}... • 展示時間: {item.timestamp}
                     </p>
                   </div>
                 </div>

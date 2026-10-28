@@ -16,7 +16,7 @@ export const VerificationTestbench: React.FC = () => {
   const [compB, setCompB] = useState('珈鼎科技');
 
   // Test B state: Tax ID check
-  const [testTaxId, setTestTaxId] = useState('24519803');
+  const [testTaxId, setTestTaxId] = useState('04595257');
 
   // Normalization results
   const normA = normalizeCompanyName(compA);
@@ -212,14 +212,14 @@ export const VerificationTestbench: React.FC = () => {
             </h3>
           </div>
           <span className="text-xs text-zinc-400 font-mono">
-            乘數 [1, 2, 1, 2, 1, 2, 4, 1] • mod 10 / 第 7 碼為 7 邏輯
+            乘數 [1, 2, 1, 2, 1, 2, 4, 1] • 2023 新制 mod 5／第 7 碼為 7 特例；通過不代表已登記
           </span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1">
             <label className="text-xs text-zinc-400 block mb-1">
-              輸入 8 碼統編測試（例如：24519803、53128409、12345678）
+              輸入 8 碼統編測試（例如：04595257、10458574、12345678）
             </label>
             <input
               type="text"

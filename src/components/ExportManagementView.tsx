@@ -229,7 +229,7 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
                 <span>示範版本的隱私與限制：</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                QR Code 在瀏覽器本機產生，不會將 vCard 傳給第三方。此網站仍會載入 Google 字型與 Unsplash 示範圖片，並非完全離線環境。OCR、向量模型與後端服務尚未接入；請勿輸入真實個資。
+                QR Code 在瀏覽器本機產生，不會將 vCard 傳給第三方。名片使用本機示意圖，網站仍會載入 Google 字型，並非完全離線環境。OCR、向量模型與後端服務尚未接入；請勿輸入真實個資。
               </p>
             </div>
           </div>

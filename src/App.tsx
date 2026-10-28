@@ -14,7 +14,8 @@ import {
   INITIAL_CARDS,
   INITIAL_MERGE_QUEUE,
   INITIAL_OFFLINE_QUEUE,
-} from './data/syntheticData';
+} from './data/demoData';
+import { demoText } from './data/demoData';
 import { Navbar } from './components/Navbar';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { CardsDirectory } from './components/CardsDirectory';
@@ -27,6 +28,11 @@ import { CardDetailModal } from './components/CardDetailModal';
 import { normalizeCompanyName, inferTitleRank } from './utils/entityResolution';
 
 export default function App() {
+  const [demoVersion, setDemoVersion] = useState(0);
+  return <DemoApp key={demoVersion} onReset={() => setDemoVersion(v => v + 1)} />;
+}
+
+function DemoApp({ onReset }: { onReset: () => void }) {
   const [activeTab, setActiveTab] = useState<
     'directory' | 'scanner' | 'search' | 'merge_queue' | 'verification' | 'export'
   >('directory');
@@ -41,6 +47,7 @@ export default function App() {
 
   // Search state
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchVersion, setSearchVersion] = useState(0);
 
   // Selected card modal state
   const [selectedCardState, setSelectedCardState] = useState<{
@@ -116,6 +123,7 @@ export default function App() {
     address: string;
     imageUrl: string;
   }) => {
+    newCardData = JSON.parse(demoText(JSON.stringify(newCardData)));
     // Check if target company exists
     let matchedCompany = companies.find(
       (c) =>
@@ -199,6 +207,7 @@ export default function App() {
 
   const handleQuickSearch = (query: string) => {
     setSearchQuery(query);
+    setSearchVersion(v => v + 1);
     setActiveTab('search');
   };
 
@@ -216,6 +225,8 @@ export default function App() {
       {/* Main View Router */}
       <aside role="note" className="px-4 py-3 text-sm text-amber-200 bg-amber-950/30 border-b border-amber-800/40">
         示範版本：掃描、OCR、向量檢索與服務狀態為模擬；資料僅暫存在記憶體，重新整理會還原。請勿輸入真實個資。
+        <span className="block mt-1">人物、公司與聯絡資訊均為合成展示資料，不代表真實登記或聯絡方式。</span>
+        <button onClick={onReset} className="mt-2 px-3 py-2 border border-amber-700 rounded min-h-11">重設示範資料</button>
       </aside>
       <main className="flex-1">
         {activeTab === 'directory' && (
@@ -240,6 +251,7 @@ export default function App() {
 
         {activeTab === 'search' && (
           <HybridSearchView
+            key={searchVersion}
             companies={companies}
             departments={departments}
             contacts={contacts}

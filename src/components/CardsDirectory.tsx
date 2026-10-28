@@ -182,6 +182,9 @@ export const CardsDirectory: React.FC<CardsDirectoryProps> = ({
                   <div
                     key={company.id}
                     id={`company-item-${company.id}`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedCompanyId(company.id); } }}
                     onClick={() => setSelectedCompanyId(company.id)}
                     className={`p-3.5 cursor-pointer transition-all ${
                       isSelected
@@ -517,6 +520,9 @@ export const CardsDirectory: React.FC<CardsDirectoryProps> = ({
                         return (
                           <div
                             key={member.id}
+                            role="button"
+                            tabIndex={card ? 0 : -1}
+                            onKeyDown={e => { if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onSelectCard(card, member, currentCompany); } }}
                             onClick={() => card && onSelectCard(card, member, currentCompany)}
                             className="bg-zinc-950 border border-zinc-800 hover:border-blue-500/50 p-3.5 rounded-xl cursor-pointer transition-all"
                           >
