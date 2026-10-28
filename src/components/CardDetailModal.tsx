@@ -7,7 +7,6 @@ import {
   Phone,
   Mail,
   Building2,
-  MapPin,
   Download,
   Copy,
   Check,

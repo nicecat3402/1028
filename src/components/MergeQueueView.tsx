@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   CheckCircle2,
-  XCircle,
   Building2,
   ArrowRight,
   Split,

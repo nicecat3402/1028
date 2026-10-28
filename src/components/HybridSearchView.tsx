@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Company, Department, Contact, Card, SearchFilter, SearchResultItem } from '../types';
+import { Company, Department, Contact, Card, SearchFilter } from '../types';
 import { execute3WaySearch } from '../utils/searchEngine';
 import { getTitleRankMeta } from '../utils/entityResolution';
 import { downloadVCard } from '../utils/exportTools';
@@ -13,9 +13,6 @@ import {
   Download,
   Eye,
   Star,
-  Layers,
-  HelpCircle,
-  Tag,
   Clock,
   Briefcase,
 } from 'lucide-react';
@@ -110,7 +107,7 @@ export const HybridSearchView: React.FC<HybridSearchViewProps> = ({
             <span>三路混合檢索引擎 (3-Way Hybrid Search)</span>
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
-            路徑 1：結構化篩選 + 路徑 2：字面模糊 (pg_trgm) + 路徑 3：語意檢索 (bge-m3 1024d) • RRF 融合 (k=60)
+            路徑 1：關鍵字 + 路徑 2：Trigram 模糊匹配 + 路徑 3：規則式概念匹配（非向量模型）• RRF 融合 (k=60)
           </p>
         </div>
 
@@ -318,7 +315,7 @@ export const HybridSearchView: React.FC<HybridSearchViewProps> = ({
                           {item.contact.email}
                         </span>
                       )}
-                      {item.card.acquired_event && (
+                      {item.card?.acquired_event && (
                         <span className="text-[11px] text-zinc-500">
                           場合: {item.card.acquired_event}
                         </span>
@@ -329,7 +326,9 @@ export const HybridSearchView: React.FC<HybridSearchViewProps> = ({
                   {/* Right: Actions */}
                   <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
                     <button
-                      onClick={() => onSelectCard(item.card, item.contact, item.company)}
+                      disabled={!item.card}
+                      title={item.card ? '檢視名片原圖' : '此聯絡人尚無名片原圖'}
+                      onClick={() => item.card && onSelectCard(item.card, item.contact, item.company)}
                       className="px-2.5 py-1.5 text-xs text-zinc-300 hover:text-blue-400 bg-zinc-800 hover:bg-zinc-700 rounded-lg border border-zinc-700 flex items-center gap-1 transition-colors"
                     >
                       <Eye className="w-3.5 h-3.5" />

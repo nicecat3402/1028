@@ -79,7 +79,7 @@ export function execute3WaySearch(
 
     // Filter by Tags
     if (filter.tags && filter.tags.length > 0) {
-      const allTags = [...ct.tags, ...(comp?.industry_tags || [])];
+      const allTags = [...(ct.tags ?? []), ...(comp?.industry_tags || [])];
       const hasAll = filter.tags.every((t) => allTags.some((at) => at.toLowerCase().includes(t.toLowerCase())));
       if (!hasAll) return false;
     }
@@ -111,8 +111,8 @@ export function execute3WaySearch(
       })
       .map((ct) => {
         const comp = companyMap.get(ct.company_id)!;
-        const dept = deptMap.get(ct.department_id);
-        const card = cardMap.get(ct.id)!;
+        const dept = ct.department_id ? deptMap.get(ct.department_id) : undefined;
+        const card = cardMap.get(ct.id) ?? null;
         return {
           contact: ct,
           company: comp,
@@ -163,7 +163,7 @@ export function execute3WaySearch(
   const path2Scores = new Map<string, { score: number; hits: HitSource[] }>();
   candidates.forEach((ct) => {
     const comp = companyMap.get(ct.company_id);
-    const dept = deptMap.get(ct.department_id);
+    const dept = ct.department_id ? deptMap.get(ct.department_id) : undefined;
     const hits: HitSource[] = [];
     let maxSim = 0;
 
@@ -227,7 +227,7 @@ export function execute3WaySearch(
       ...(comp?.industry_tags || []),
       ct.title_raw,
       ct.notes,
-      ...ct.tags,
+      ...(ct.tags ?? []),
     ].join(' ').toLowerCase();
 
     // Check semantic theme activations
@@ -241,7 +241,7 @@ export function execute3WaySearch(
           semanticScore = Math.max(semanticScore, s);
           hits.push({
             type: 'semantic',
-            field: 'bge-m3 語意向量',
+            field: '概念規則（示範）',
             score: s,
             reason: `命中「${concept.keywords[0]}」語意關聯範疇 (${(s * 100).toFixed(0)}% 相近)`,
           });
@@ -292,8 +292,8 @@ export function execute3WaySearch(
     .map(([id, { rrf, hits }]) => {
       const contact = candidates.find((c) => c.id === id)!;
       const company = companyMap.get(contact.company_id)!;
-      const department = deptMap.get(contact.department_id);
-      const card = cardMap.get(id)!;
+      const department = contact.department_id ? deptMap.get(contact.department_id) : undefined;
+      const card = cardMap.get(id) ?? null;
 
       // Deduplicate hits
       const uniqueHits = hits.filter((h, i, arr) => arr.findIndex((x) => x.type === h.type && x.field === h.field) === i);

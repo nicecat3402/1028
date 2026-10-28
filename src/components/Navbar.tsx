@@ -5,7 +5,6 @@ import {
   Search,
   GitMerge,
   FlaskConical,
-  ShieldCheck,
   Server,
   HardDrive,
   Download,
@@ -43,17 +42,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3 shrink-0">
           <span className="flex items-center gap-1.5 font-medium text-emerald-400">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            完全地端模式 (嚴禁雲端 API)
+            前端示範模式（資料不持久保存）
           </span>
           <span className="text-zinc-700">|</span>
           <span className="flex items-center gap-1 text-zinc-400">
             <Server className="w-3.5 h-3.5 text-zinc-500" />
-            FastAPI: 8090 / PostgreSQL: 5432
+            FastAPI / PostgreSQL：規劃中
           </span>
           <span className="text-zinc-700">|</span>
           <span className="flex items-center gap-1 text-zinc-400">
             <HardDrive className="w-3.5 h-3.5 text-blue-400" />
-            Ollama bge-m3 (1024d)
+            Ollama：未連線（示意）
           </span>
           <span className="text-zinc-700">|</span>
           <span className="text-zinc-400">
@@ -83,9 +82,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <div>
               <div className="font-bold text-[#f4f4f5] tracking-tight flex items-center gap-2 text-base">
-                <span>Namecard.AI</span>
+                <span>OmniCard AI</span>
                 <span className="text-[10px] font-mono uppercase bg-blue-600/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
-                  On-Premise
+                  Demo
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-none mt-0.5">

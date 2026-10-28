@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Company,
   Department,
@@ -33,7 +33,7 @@ export default function App() {
 
   // Core state from synthetic data
   const [companies, setCompanies] = useState<Company[]>(INITIAL_COMPANIES);
-  const [departments, setDepartments] = useState<Department[]>(INITIAL_DEPARTMENTS);
+  const [departments] = useState<Department[]>(INITIAL_DEPARTMENTS);
   const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
   const [cards, setCards] = useState<Card[]>(INITIAL_CARDS);
   const [mergeQueue, setMergeQueue] = useState<MergeQueueItem[]>(INITIAL_MERGE_QUEUE);
@@ -158,6 +158,7 @@ export default function App() {
       extension: '',
       email: newCardData.email,
       is_primary_contact: false,
+      tags: [],
       notes: '由名片快速掃描加入',
       created_at: new Date().toISOString(),
     };
@@ -213,6 +214,9 @@ export default function App() {
       />
 
       {/* Main View Router */}
+      <aside role="note" className="px-4 py-3 text-sm text-amber-200 bg-amber-950/30 border-b border-amber-800/40">
+        示範版本：掃描、OCR、向量檢索與服務狀態為模擬；資料僅暫存在記憶體，重新整理會還原。請勿輸入真實個資。
+      </aside>
       <main className="flex-1">
         {activeTab === 'directory' && (
           <CardsDirectory

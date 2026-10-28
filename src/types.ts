@@ -123,7 +123,7 @@ export interface SearchResultItem {
   contact: Contact;
   company: Company;
   department?: Department;
-  card: Card;
+  card: Card | null;
   rrf_score: number;
   hit_sources: HitSource[];
 }

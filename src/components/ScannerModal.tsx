@@ -1,19 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   Camera,
   Upload,
   RefreshCw,
   CheckCircle2,
-  AlertCircle,
-  FileImage,
   Layers,
   Sparkles,
   Play,
-  RotateCcw,
   Zap,
 } from 'lucide-react';
 import { OfflineQueueItem, Company } from '../types';
-import { evaluateEntityMatch } from '../utils/entityResolution';
 
 interface ScannerModalProps {
   offlineQueue: OfflineQueueItem[];
@@ -41,8 +37,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
   const [capturedCount, setCapturedCount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'camera' | 'batch_upload' | 'queue'>('camera');
-  const [cameraActive, setCameraActive] = useState<boolean>(true);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Simulated card presets for testing rapid scanner
   const MOCK_CARD_PRESETS = [
@@ -153,7 +147,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
             <span>名片智能採集與掃描</span>
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
-            邊緣自動偵測校正 • 連拍模式支援 • 離線佇列 (IndexedDB) • RapidOCR (CPU) + Ollama VLM
+            模擬流程：預設合成名片 • 記憶體佇列（不保存）• 尚未接入相機、檔案上傳或 OCR
           </p>
         </div>
 
@@ -206,7 +200,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
             <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 via-zinc-950 to-zinc-900 flex items-center justify-center">
               <div className="text-center space-y-2 opacity-60">
                 <Camera className="w-12 h-12 text-zinc-600 mx-auto animate-pulse" />
-                <p className="text-xs text-zinc-500 font-mono">相機自動對焦中 (60 FPS)</p>
+                <p className="text-xs text-zinc-500 font-mono">示範取景（未啟用相機）</p>
               </div>
             </div>
 
@@ -254,6 +248,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
             {/* Bottom 1/3 Floating Shutter Control (Mobile optimized) */}
             <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-6 z-20">
               <button
+                id="demo-capture"
+                aria-label="新增一張模擬名片"
                 onClick={handleCapture}
                 className="w-16 h-16 rounded-full bg-zinc-900 border-4 border-blue-500 flex items-center justify-center text-blue-400 shadow-xl hover:scale-105 active:scale-95 transition-all group"
                 title="按下快門拍照"
@@ -346,7 +342,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
         ) : (
           <div className="divide-y divide-zinc-800/60 max-h-80 overflow-y-auto">
             {offlineQueue.map((item) => (
-              <div key={item.id} className="py-3 flex items-center justify-between gap-4">
+              <div key={item.id} data-testid="scan-queue-item" className="py-3 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden shrink-0">
                     <img src={item.blob_url} alt="縮圖" className="w-full h-full object-cover" />

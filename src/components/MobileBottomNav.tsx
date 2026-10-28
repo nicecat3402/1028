@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderKanban, Camera, Search, GitMerge, FlaskConical } from 'lucide-react';
+import { FolderKanban, Camera, Search, GitMerge, FlaskConical, Download } from 'lucide-react';
 
 interface MobileBottomNavProps {
   activeTab: 'directory' | 'scanner' | 'search' | 'merge_queue' | 'verification' | 'export';
@@ -33,7 +33,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         }`}
       >
         <Camera className="w-5 h-5" />
-        <span>掃描相機</span>
+        <span>模擬掃描</span>
       </button>
 
       <button
@@ -70,6 +70,14 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       >
         <FlaskConical className="w-5 h-5" />
         <span>驗證場</span>
+      </button>
+      <button
+        id="mobile-nav-export"
+        onClick={() => setActiveTab('export')}
+        className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-xs font-medium ${activeTab === 'export' ? 'text-blue-400' : 'text-zinc-400'}`}
+      >
+        <Download className="w-5 h-5" />
+        <span>匯出</span>
       </button>
     </div>
   );

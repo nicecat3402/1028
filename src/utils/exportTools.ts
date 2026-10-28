@@ -74,7 +74,7 @@ export function downloadBatchVCard(contacts: Contact[], companies: Company[], de
   const deptMap = new Map(departments.map((d) => [d.id, d]));
 
   const allVcards = contacts.map((ct) => {
-    return generateVCard3(ct, compMap.get(ct.company_id), deptMap.get(ct.department_id));
+    return generateVCard3(ct, compMap.get(ct.company_id), ct.department_id ? deptMap.get(ct.department_id) : undefined);
   });
 
   const fullContent = allVcards.join('\r\n\r\n');
@@ -115,7 +115,7 @@ export function downloadContactsCSV(contacts: Contact[], companies: Company[], d
 
   const rows = contacts.map((ct) => {
     const comp = compMap.get(ct.company_id);
-    const dept = deptMap.get(ct.department_id);
+    const dept = ct.department_id ? deptMap.get(ct.department_id) : undefined;
 
     return [
       ct.name,

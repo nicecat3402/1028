@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Company, Department, Contact, Card } from '../types';
 import { downloadBatchVCard, downloadContactsCSV, generateVCard3 } from '../utils/exportTools';
 import {
@@ -11,7 +12,6 @@ import {
   Server,
   ShieldCheck,
   FileCode,
-  Users,
 } from 'lucide-react';
 
 interface ExportManagementViewProps {
@@ -37,11 +37,6 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
     ? generateVCard3(selectedContact, selectedCompany, selectedDept)
     : '';
 
-  // Encode for SVG QR code generator API or direct data URI representation
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
-    vcardText
-  )}`;
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
@@ -60,13 +55,12 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
 
         <div className="flex flex-wrap items-center gap-2">
           <a
-            href={`${import.meta.env.BASE_URL}1028-source.tar.gz`}
-            download="1028-source.tar.gz"
+            href="https://github.com/nicecat3402/1028/archive/refs/heads/main.zip"
             className="px-3.5 py-2 text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 hover:border-zinc-600 rounded-lg flex items-center gap-1.5 transition-colors"
             title="下載本專案完整原始碼封存檔"
           >
             <FileCode className="w-4 h-4 text-purple-400" />
-            專案原始碼 (.tar.gz)
+            最新原始碼 (.zip)
           </a>
 
           <button
@@ -125,11 +119,11 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
           {/* QR Code and Card Preview */}
           <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 flex flex-col sm:flex-row items-center gap-6 justify-center">
             <div className="p-2 bg-white rounded-xl shadow-lg shrink-0">
-              <img
-                src={qrCodeUrl}
-                alt="vCard QR Code"
-                className="w-44 h-44 object-contain"
-              />
+              {vcardText ? (
+                <QRCodeSVG value={vcardText} size={176} marginSize={4} title="vCard QR Code（本機產生）" />
+              ) : (
+                <p className="text-zinc-900 text-xs p-4">尚無聯絡人可產生 QR Code</p>
+              )}
             </div>
 
             <div className="space-y-1.5 text-xs text-zinc-300 min-w-0">
@@ -165,11 +159,11 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
             <div className="flex items-center gap-2">
               <Server className="w-5 h-5 text-emerald-400" />
               <h3 className="font-bold text-sm text-[#f4f4f5]">
-                地端系統運作服務狀態 (Service Health)
+                地端服務架構規劃（非即時監測）
               </h3>
             </div>
             <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2 py-0.5 rounded">
-              All Systems Operational
+              Demo / 未連線
             </span>
           </div>
 
@@ -188,7 +182,7 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
                 </div>
               </div>
               <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> 連線正常
+                <CheckCircle2 className="w-3.5 h-3.5" /> 規劃中
               </span>
             </div>
 
@@ -206,7 +200,7 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
                 </div>
               </div>
               <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> 本地常駐
+                <CheckCircle2 className="w-3.5 h-3.5" /> 規劃中
               </span>
             </div>
 
@@ -224,7 +218,7 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
                 </div>
               </div>
               <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> 運作中
+                <CheckCircle2 className="w-3.5 h-3.5" /> 規劃中
               </span>
             </div>
 
@@ -232,10 +226,10 @@ export const ExportManagementView: React.FC<ExportManagementViewProps> = ({
             <div className="p-4 bg-emerald-950/20 border border-emerald-800/40 rounded-lg space-y-1.5 text-xs text-zinc-300">
               <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
                 <ShieldCheck className="w-4 h-4" />
-                <span>完全地端資安與隱私宣告：</span>
+                <span>示範版本的隱私與限制：</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                本系統所有名片影像、OCR 辨識與向量嵌入運算皆嚴格限定於區域網路地端主機，絕不將任何個人姓名、電話、電郵或名片圖檔傳輸至外部雲端。
+                QR Code 在瀏覽器本機產生，不會將 vCard 傳給第三方。此網站仍會載入 Google 字型與 Unsplash 示範圖片，並非完全離線環境。OCR、向量模型與後端服務尚未接入；請勿輸入真實個資。
               </p>
             </div>
           </div>

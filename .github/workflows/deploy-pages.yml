@@ -32,9 +32,13 @@ jobs:
         run: npm run lint
 
       - name: Build
+        # Deployment must also pass regression tests (independent of the PR workflow).
         run: npm run build
         env:
           BASE_PATH: /1028/
+
+      - name: Regression tests
+        run: npm test
 
       - uses: actions/upload-pages-artifact@v3
         with:

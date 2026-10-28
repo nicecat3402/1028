@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import {
   FlaskConical,
-  CheckCircle2,
-  AlertTriangle,
   Cpu,
-  Layers,
-  ArrowRight,
   ShieldCheck,
-  Zap,
 } from 'lucide-react';
 import {
   normalizeCompanyName,
   calculateTrigramSimilarity,
   validateTaiwanTaxId,
-  evaluateEntityMatch,
 } from '../utils/entityResolution';
 
 export const VerificationTestbench: React.FC = () => {
@@ -50,7 +44,7 @@ export const VerificationTestbench: React.FC = () => {
         </div>
 
         <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-full self-start">
-          ✓ 驗證 A &amp; B 已通過審查
+          示範驗證台（效能與顯存數值為示意）
         </span>
       </div>
 

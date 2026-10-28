@@ -1,6 +1,6 @@
-# 1028 - 企業級離線名片辨識與實體解析系統 (OmniCard AI)
+# 1028 - OmniCard AI 名片管理互動示範
 
-> 專為高機密需求、地端部署設計的 B2B 名片數位化、全文本雙核心檢索與多維度實體消歧系統。
+> 前端概念驗證，尚非正式產品。使用合成資料，請勿輸入真實個資；重新整理會還原所有變更。
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
@@ -15,24 +15,24 @@
 
 ## 🌟 核心特色 (Core Features)
 
-1. **🔒 100% 離線隱私優先架構 (Air-Gapped & Offline Ready)**
-   - 支援 IndexedDB 本地沙盒儲存，名片資料、OCR 辨識與聯絡人關係完全不離開用戶設備/企業內網。
-   - 預設提供台灣在地常見職稱、分公司與統編 (8碼驗證演算法) 離線解析。
+1. **瀏覽器記憶體內的示範資料**
+   - 尚無 IndexedDB、LocalStorage 或離線快取；編輯、模擬匯入及歸併結果不會持久保存。
+   - Google Fonts 與 Unsplash 示範圖片需要網路，並非完全離線或高機密部署環境。
 
-2. **🔍 雙核心混合搜尋引擎 (BM25 + Dense Semantic Hybrid Search via RRF)**
-   - 採用 **Reciprocal Rank Fusion (RRF)** 融合倒排索引關鍵字評分與語意相似度。
-   - 支援打字容錯、三元語彙 (Trigram) 模糊匹配與階層篩選。
+2. **關鍵字、Trigram 與規則式概念匹配**
+   - 使用 **Reciprocal Rank Fusion (RRF)** 融合三路結果；沒有 BM25、倒排索引或實際向量模型。
+   - 支援三元語彙模糊匹配與階層篩選，仍有待正式驗證的搜尋邏輯。
 
-3. **🧩 跨名片實體解析與消歧 (Entity Resolution & Disambiguation)**
-   - 多維度比對電話格式化 (E.164)、企業統編、職稱層級推導 (C-Level, VP, Director, Manager)。
-   - 智慧偵測並標記「同名異人」或「同人升遷/轉職」，提供一鍵合併比對視窗。
+3. **歸併流程與模擬掃描**
+   - 展示公司相似度與預先建立的歸併佇列；尚無同名異人或升遷偵測。
+   - 掃描按鈕僅產生預設合成名片，沒有相機、檔案上傳或 OCR 辨識。
 
-4. **⚡ 即時硬體效能與驗證台 (RTX 4070 Ti SUPER 16GB VRAM 規劃)**
-   - 內建在地端大語言模型 (Ollama / Qwen2.5 / DeepSeek) 與 OCR 管道時的顯存分配即時試算。
-   - 內建互動式三元詞 (Trigram) 測試器與台灣統一編號除數和檢核台。
+4. **驗證台與架構示意**
+   - Trigram 測試器可互動；GPU 配額、效能與服務狀態為靜態示意，沒有連接後端。
+   - 統編檢核仍使用待修正的舊規則，合成資料也含無效號碼，請勿作為正式驗證依據。
 
-5. **💼 企業級匯出與無痛整合**
-   - 支援動態產生符合 RFC 6350 標準的 **vCard 4.0** 與即時 **QR Code**，手機一掃即可存入通訊錄。
+5. **CSV、vCard 與本機 QR Code**
+   - 產生 **vCard 3.0** 與本機 SVG QR Code，不會將 vCard 傳到第三方 QR 服務。特殊字元與長行的完整相容性留待後續修正。
    - 支援匯出含完整 BOM 的 **Excel 相容 CSV**，杜絕繁體中文亂碼。
 
 ---
@@ -43,7 +43,7 @@
 - **樣式系統**: Tailwind CSS (Elegant Dark 主題風格)
 - **圖示庫**: Lucide React
 - **建置工具**: Vite
-- **持久化**: LocalStorage & IndexedDB 本地儲存相容
+- **儲存**: React 記憶體狀態（無持久化）
 
 ---
 
@@ -59,7 +59,7 @@ cd 1028
 ### 2. 安裝依賴項
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 3. 啟動開發伺服器
@@ -84,7 +84,12 @@ npm run build
 ### 5. GitHub Pages 自動佈署
 
 推送至 `main` 分支後，GitHub Actions 會自動執行 `.github/workflows/deploy-pages.yml`：
-型別檢查 → `npm ci` → `vite build` (base=`/1028/`) → 上傳 `dist/` → 發佈至 GitHub Pages。
+`npm ci` → 嚴格型別檢查 → 建置與回歸測試 → 上傳 `dist/` → 發佈至 GitHub Pages。
+
+PR 與 main 另有 CI：`npm run lint`（TypeScript 檢查）、`npm test`、`npm run build`。
+CI 也會用 Playwright 驗證桌面／手機六個分頁、模擬匯入後搜尋及本機 QR。
+本機執行瀏覽器測試：先以 `BASE_PATH=/1028/` 建置，再執行 `npx playwright install chromium` 與 `npm run test:smoke`。
+`docs/` 保留的後端架構與階段交付文件為規劃／歷史示意，不代表本 repo 已實作。
 
 亦可於 Actions 頁面選擇 **Deploy GitHub Pages** → **Run workflow** 手動觸發。
 
@@ -99,8 +104,8 @@ npm run build
 ├── src/
 │   ├── components/       # UI 元件 (搜尋引擎、實體消歧、掃描辨識、測試台等)
 │   ├── data/             # 示範企業名片與統編資料庫
-│   ├── types/            # 完整 TypeScript 型別定義
-│   ├── utils/            # 實體解析演算法、統編驗證、BM25 & 雙核心搜尋
+│   ├── types.ts          # TypeScript 型別定義
+│   ├── utils/            # 比對、舊制統編檢核、三路搜尋與匯出
 │   ├── App.tsx           # 主應用程式佈局與導覽
 │   ├── main.tsx          # 應用程式進入點
 │   └── index.css         # 全域 Tailwind CSS 樣式
