@@ -1,0 +1,15 @@
+.git
+node_modules
+dist
+dist-onprem
+backend/.venv
+backend/data
+backend/.pytest_cache
+backend/.ruff_cache
+**/__pycache__
+**/.env
+**/*.pem
+**/*.key
+test-results
+playwright-report
+backups

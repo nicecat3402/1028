@@ -1,0 +1,57 @@
+import { expect, test } from '@playwright/test';
+
+test('real HTTP login, persistence, edit, local QR, export and logout', async ({ page }) => {
+  const errors: string[] = [];
+  const external: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', req => { if (!req.url().startsWith('http://127.0.0.1:18092') && !req.url().startsWith('blob:')) external.push(req.url()); });
+  await page.goto('/onprem.html');
+  await page.getByLabel('帳號', { exact: true }).fill('testadmin');
+  await page.getByLabel('密碼', { exact: true }).fill('test-only-password-123');
+  await page.getByRole('button', { name: '登入', exact: true }).click();
+  await page.getByRole('button', { name: '新增聯絡人', exact: true }).click();
+  await page.getByLabel('姓名', { exact: true }).fill('真實流程測試');
+  await page.getByLabel('公司', { exact: true }).fill('內網測試公司');
+  await page.getByLabel('Email', { exact: true }).fill('test@example.com');
+  await page.getByRole('button', { name: '儲存聯絡人', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '真實流程測試', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '編輯 真實流程測試', exact: true }).click();
+  await page.getByLabel('職稱', { exact: true }).fill('採購經理');
+  await page.getByRole('button', { name: '儲存聯絡人', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button', { name: 'QR / vCard', exact: true }).click();
+  await expect(page.locator('svg').filter({ has: page.locator('title', { hasText: '本機聯絡人 QR Code' }) })).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: '下載 vCard', exact: true }).click();
+  expect((await download).suggestedFilename()).toBe('contact.vcf');
+  await page.getByLabel('搜尋內容').fill('採購');
+  await page.getByRole('button', { name: '三路搜尋', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: '語意檢索未就緒' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '真實流程測試', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '登出', exact: true }).click();
+  await expect(page.getByRole('button', { name: '登入', exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
+  expect(external).toEqual([]);
+});
+
+test('uploaded card persists, requires manual review and rejects a second review', async ({ page }) => {
+  await page.goto('/onprem.html');
+  await page.getByLabel('帳號', { exact: true }).fill('testadmin');
+  await page.getByLabel('密碼', { exact: true }).fill('test-only-password-123');
+  await page.getByRole('button', { name: '登入', exact: true }).click();
+  await page.getByRole('button', { name: '圖片／OCR 核對', exact: true }).click();
+  const buffer = await page.screenshot();
+  await page.locator('input[type=file]').setInputFiles({ name: 'test-card.png', mimeType: 'image/png', buffer });
+  await expect(page.getByRole('status')).toContainText('圖片已保存');
+  await page.getByRole('button', { name: '校正名片', exact: true }).click();
+  await expect(page.getByLabel('OCR 原始文字（模型輸出需人工核對）')).toContainText('尚未辨識完成');
+  await page.getByLabel('姓名', { exact: true }).fill('人工核對測試');
+  await page.getByRole('button', { name: '確認校正並建立聯絡人', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText('已人工核對', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '校正名片', exact: true })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '人工核對測試', exact: true })).toBeVisible();
+});

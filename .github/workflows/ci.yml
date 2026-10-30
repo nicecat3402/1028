@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, 'feature/**']
 
 permissions:
   contents: read
@@ -25,3 +25,45 @@ jobs:
           BASE_PATH: /1028/
       - run: npx playwright install --with-deps chromium
       - run: npm run test:smoke
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.18'
+      - run: uv sync --project backend --python 3.12 --frozen
+      - run: npm run build:onprem
+      - run: npm run test:onprem
+
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: omnicard_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test -d omnicard_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://test:test-only-password@localhost:5432/omnicard_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.18'
+      - run: uv sync --project backend --python 3.12 --frozen
+      - run: uv run --project backend ruff check backend
+      - run: uv run --project backend pytest backend/tests -q
+
+  containers:
+    runs-on: ubuntu-latest
+    env:
+      DB_PASSWORD: ci-only-not-a-production-password
+      APP_ORIGIN: https://omnicard.test
+      EMBEDDING_DIGEST: ci-placeholder-no-model-calls
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash -n deploy/backup.sh deploy/restore.sh
+      - run: docker compose -f deploy/compose.yml config --quiet
+      - run: docker compose -f deploy/compose.yml build api web
