@@ -53,6 +53,17 @@ PostgreSQL CI 使用專用 `omnicard_test` 資料庫，實際執行 Alembic 遷�
 
 程式測試通過不代表以上實機驗收已完成。不得用測試替身結果宣稱模型品質已驗證。
 
+### 已完成驗證（2026-10-30）
+
+[CI 40983019814](https://github.com/nicecat3402/1028/actions/runs/40983019814) 全數通過：
+
+- PostgreSQL 後端 18 項測試，涵蓋真實遷移、pgvector／RRF SQL、交易回滾與工作版本保護。
+- DEMO 單元測試 25 項、瀏覽器流程 3 項；正式版真實 HTTP 瀏覽器流程 2 項。
+- TypeScript／Ruff、兩種前端建置、API／web Docker 映像建置。
+- 隔離容器啟動、HTTP health、合成名片與圖片備份還原、舊 session 撤銷、非空資料庫拒絕還原。
+
+此 CI 未呼叫真實 Ollama 模型，亦未連接公司伺服器；實際模型品質與公司環境驗收仍待完成。
+
 ## 部署檔案與操作
 
 `deploy/compose.yml` 提供 db、migrate、api、worker、web。資料庫不發布 host port；
@@ -84,7 +95,7 @@ archive 路徑合法，再還原並撤銷所有舊 sessions。必須提供 `--co
 
 ## 尚待完善的運維項目
 
-- 還原腳本與完整容器流程尚需隔離環境演練。
+- 已完成 CI 合成資料還原演練；公司正式備份目的地、保留策略及實機還原仍需確認。
 - 背景工作列表／圖片頁目前顯示最新 100 筆；聯絡人具分頁。
 - OCR 失敗可重試，尚未整合 qwen3-vl fallback。
 - 實際模型品質、HTTPS 路由與公司伺服器資源共存仍需驗收。
